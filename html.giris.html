@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Site Yönetim Sistemi - İstek & Şikayet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-50">
+  <div id="app"></div>
+
+  <script>
+    // ------------------ Simüle Veritabanı ------------------
+    function initializeDatabase() {
+      return {
+        blocks: [
+          { id: 1, block_name: 'A Blok', total_floors: 8 },
+          { id: 2, block_name: 'B Blok', total_floors: 10 },
+          { id: 3, block_name: 'C Blok', total_floors: 6 }
+        ],
+        apartments: [
+          { id: 1, block_id: 1, floor_number: 3, door_number: '5', type: '3+1' },
+          { id: 2, block_id: 1, floor_number: 5, door_number: '8', type: '2+1' },
+          { id: 3, block_id: 2, floor_number: 2, door_number: '3', type: '3+1' },
+          { id: 4, block_id: 2, floor_number: 7, door_number: '12', type: '4+1' },
+          { id: 5, block_id: 3, floor_number: 1, door_number: '2', type: '2+1' }
+        ],
+        users: [
+          // username + password eklendi
+          { id: 1, full_name: 'Ahmet Yılmaz', email: 'admin@site.com',  phone: '05551234567', role: 'Admin',    is_active: true, username: 'admin',    password: 'admin123' },
+          { id: 2, full_name: 'Mehmet Demir', email: 'teknik@site.com', phone: '05559876543', role: 'Staff',    is_active: true, username: 'personel', password: 'personel123' },
+          { id: 3, full_name: 'Ayşe Kaya',     email: 'ayse@email.com',  phone: '05551111111', role: 'Resident', is_active: true, username: 'ayse',     password: 'ayse123' },
+          { id: 4, full_name: 'Fatma Şahin',   email: 'fatma@email.com', phone: '05552222222', role: 'Resident', is_active: true, username: 'fatma',    password: 'fatma123' }
+        ],
+        occupancy: [
+          { id: 1, user_id: 3, apartment_id: 1, type: 'Owner',  start_date: '2020-01-15' },
+          { id: 2, user_id: 4, apartment_id: 3, type: 'Tenant', start_date: '2023-06-01' }
+        ],
+        categories: [
+          { id: 1, name: 'Elektrik',  sla_hours: 4 },
+          { id: 2, name: 'Su',        sla_hours: 2 },
+          { id: 3, name: 'Asansör',   sla_hours: 6 },
+          { id: 4, name: 'Temizlik',  sla_hours: 24 },
+          { id: 5, name: 'Güvenlik',  sla_hours: 1 },
+          { id: 6, name: 'Gürültü',   sla_hours: 12 }
+        ],
+        tickets: [
+          {
+            id: 1,
+            user_id: 3,
+            apartment_id: 1,
+            category_id: 3,
+            title: 'Asansör Çalışmıyor',
+            description: 'A Blok asansörü sabahtan beri bozuk',
+            priority: 'High',
+            status: 'In_Progress',
+            created_at: '2024-12-03T08:30:00',
+            closed_at: null,
+            satisfaction_score: null,
+            assigned_to: 2
+          },
+          {
+            id: 2,
+            user_id: 4,
+            apartment_id: 3,
+            category_id: 2,
+            title: 'Su Basıncı Düşük',
+            description: 'Üst katta su basıncı çok düşük',
+            priority: 'Medium',
+            status: 'Open',
+            created_at: '2024-12-03T14:20:00',
+            closed_at: null,
+            satisfaction_score: null,
+            assigned_to: null
+          },
+          {
+            id: 3,
+            user_id: 3,
+            apartment_id: 1,
+            category_id: 4,
+            title: 'Merdiven Temizliği',
+            description: 'Merdivenler 3 gündür temizlenmiyor',
+            priority: 'Low',
+            status: 'Resolved',
+            created_at: '2024-12-01T10:00:00',
+            closed_at: '2024-12-02T16:30:00',
+            satisfaction_score: 5,
+            assigned_to: 2
+          }
+        ],
+        ticket_actions: [
+          { id: 1, ticket_id: 1, user_id: 1, action_type: 'Assignment',   description: 'Teknik servise atandı',               created_at: '2024-12-03T08:45:00' },
+          { id: 2, ticket_id: 1, user_id: 2, action_type: 'StatusChange', description: 'İşleme alındı, parça sipariş edildi', created_at: '2024-12-03T09:15:00' },
+          { id: 3, ticket_id: 3, user_id: 2, action_type: 'StatusChange', description: 'Temizlik tamamlandı',                created_at: '2024-12-02T16:30:00' }
+        ]
+      };
+    }
+
+    // ------------------ Uygulama Durumu ------------------
+    const state = {
+      db: initializeDatabase(),
+      currentUserId: null,  // Başta kimse giriş yapmamış
+      activeTab: 'dashboard',
+      filterStatus: 'all',
+      showNewTicketModal: false,
+      newTicket: {
+        category_id: '',
+        title: '',
+        description: '',
+        priority: 'Medium'
+      }
+    };
+    // ------------------ localStorage Kayıt Fonksiyonları ------------------
+const STORAGE_KEY = 'siteYonetimState_v1';
+
+function saveStateToStorage() {
+  try {
+    const data = {
+      db: state.db,
+      currentUserId: state.currentUserId,
+      activeTab: state.activeTab,
+      filterStatus: state.filterStatus
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (err) {
+    console.error('localStorage kaydetme hatası:', err);
+  }
+}
+
+function loadStateFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return; // daha önce kayıt yoksa dokunma
+
+    const data = JSON.parse(raw);
+
+    if (data.db) state.db = data.db;
+    if ('currentUserId' in data) state.currentUserId = data.currentUserId;
+    if ('activeTab' in data) state.activeTab = data.activeTab;
+    if ('filterStatus' in data) state.filterStatus = data.filterStatus;
+  } catch (err) {
+    console.error('localStorage okuma hatası:', err);
+  }
+}
+
+
+    // ------------------ Yardımcı Fonksiyonlar ------------------
+    function getCurrentUser() {
+      if (state.currentUserId == null) return null;
+      return state.db.users.find(u => u.id === state.currentUserId) || null;
+    }
+
+    function getRoleLabel(role) {
+      if (role === 'Admin') return 'Admin';
+      if (role === 'Staff') return 'Personel';
+      if (role === 'Resident') return 'Kullanıcı';
+      return role;
+    }
+
+    function getBlockName(blockId) {
+      const block = state.db.blocks.find(b => b.id === blockId);
+      return block ? block.block_name : '';
+    }
+
+    function getApartmentInfo(aptId) {
+      const apt = state.db.apartments.find(a => a.id === aptId);
+      if (!apt) return '';
+      const block = getBlockName(apt.block_id);
+      return `${block} - Kat ${apt.floor_number} - No ${apt.door_number}`;
+    }
+
+    function getCategoryName(catId) {
+      const cat = state.db.categories.find(c => c.id === catId);
+      return cat ? cat.name : '';
+    }
+
+    function getUserName(userId) {
+      const user = state.db.users.find(u => u.id === userId);
+      return user ? user.full_name : '';
+    }
+
+    function getStatusBadgeClass(status) {
+      const map = {
+        'Open':        'bg-blue-100 text-blue-800',
+        'Assigned':    'bg-purple-100 text-purple-800',
+        'In_Progress': 'bg-yellow-100 text-yellow-800',
+        'Pending':     'bg-orange-100 text-orange-800',
+        'Resolved':    'bg-green-100 text-green-800',
+        'Closed':      'bg-gray-100 text-gray-800'
+      };
+      return map[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    function getPriorityClass(priority) {
+      const map = {
+        'Low':      'text-green-600',
+        'Medium':   'text-yellow-600',
+        'High':     'text-orange-600',
+        'Critical': 'text-red-600'
+      };
+      return map[priority] || 'text-gray-600';
+    }
+
+    // ------------------ İşlemler ------------------
+    function createTicket() {
+      const db = state.db;
+      const currentUser = getCurrentUser();
+      if (!currentUser) return;
+
+      if (!state.newTicket.category_id || !state.newTicket.title) {
+        alert('Lütfen kategori ve başlık alanlarını doldurun');
+        return;
+      }
+
+      const userOccupancy = db.occupancy.find(o => o.user_id === currentUser.id);
+
+      const ticket = {
+        id: db.tickets.length + 1,
+        user_id: currentUser.id,
+        apartment_id: userOccupancy ? userOccupancy.apartment_id : null,
+        category_id: parseInt(state.newTicket.category_id, 10),
+        title: state.newTicket.title,
+        description: state.newTicket.description,
+        priority: state.newTicket.priority,
+        status: 'Open',
+        created_at: new Date().toISOString(),
+        closed_at: null,
+        satisfaction_score: null,
+        assigned_to: null
+      };
+
+        db.tickets.push(ticket);
+  state.newTicket = { category_id: '', title: '', description: '', priority: 'Medium' };
+  state.showNewTicketModal = false;
+
+  // >>> localStorage'a kaydet
+  saveStateToStorage();
+
+  render();
+}
+
+    
+
+    function updateTicketStatus(ticketId, newStatus, assignedTo = null) {
+      const db = state.db;
+      const currentUser = getCurrentUser();
+      if (!currentUser) return;
+
+      const ticket = db.tickets.find(t => t.id === ticketId);
+      if (!ticket) return;
+
+      ticket.status = newStatus;
+      if (assignedTo !== null) {
+        ticket.assigned_to = assignedTo;
+      }
+      if (newStatus === 'Resolved' || newStatus === 'Closed') {
+        ticket.closed_at = new Date().toISOString();
+      }
+
+      const action = {
+        id: db.ticket_actions.length + 1,
+        ticket_id: ticketId,
+        user_id: currentUser.id,
+        action_type: 'StatusChange',
+        description: `Durum güncellendi: ${newStatus}`,
+        created_at: new Date().toISOString()
+      };
+      db.ticket_actions.push(action);
+
+  render();
+}
+
+    
+
+    function getFilteredTickets() {
+      const db = state.db;
+      const currentUser = getCurrentUser();
+      if (!currentUser) return [];
+
+      return db.tickets.filter(t => {
+        if (currentUser.role === 'Resident') {
+          // Kullanıcı sadece kendi taleplerini görür
+          return t.user_id === currentUser.id;
+        }
+        if (currentUser.role === 'Staff') {
+          // Personel: kendisine atanmış talepler + açık talepler
+          if (t.assigned_to === currentUser.id) return true;
+          if (t.status === 'Open') return true;
+          return false;
+        }
+        // Admin: filtreye göre tüm talepler
+        if (state.filterStatus === 'all') return true;
+        return t.status === state.filterStatus;
+      });
+    }
+
+    function getAnalytics() {
+      const db = state.db;
+      const total = db.tickets.length;
+      const open = db.tickets.filter(t => t.status === 'Open').length;
+      const inProgress = db.tickets.filter(t => t.status === 'In_Progress').length;
+      const resolved = db.tickets.filter(t => t.status === 'Resolved').length;
+      const scored = db.tickets.filter(t => t.satisfaction_score != null);
+      const avg =
+        scored.length === 0
+          ? 0
+          : scored.reduce((sum, t) => sum + t.satisfaction_score, 0) / scored.length;
+      const categoryStats = db.categories.map(cat => ({
+        name: cat.name,
+        count: db.tickets.filter(t => t.category_id === cat.id).length
+      }));
+
+      return {
+        total,
+        open,
+        inProgress,
+        resolved,
+        avgSatisfaction: avg.toFixed(1),
+        categoryStats
+      };
+    }
+
+    // ------------------ Render ------------------
+    function render() {
+      const app = document.getElementById('app');
+      const currentUser = getCurrentUser();
+
+      // Eğer giriş yapılmamışsa login ekranını göster
+      if (!currentUser) {
+        const loginHtml = `
+          <div class="min-h-screen flex items-center justify-center bg-gray-50">
+            <div class="bg-white shadow-lg rounded-xl p-8 max-w-md w-full">
+              <div class="flex items-center space-x-3 mb-6">
+                <div class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-2xl">🏠</div>
+                <div>
+                  <h1 class="text-xl font-bold text-gray-900">Site Yönetim Sistemi</h1>
+                  <p class="text-sm text-gray-500">Admin / Personel / Kullanıcı girişi</p>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Kullanıcı Adı</label>
+                  <input
+                    type="text"
+                    id="loginUsername"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="örn. admin, personel, ayse..."
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
+                  <input
+                    type="password"
+                    id="loginPassword"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Şifreniz"
+                  />
+                </div>
+
+                <button
+                  id="btnLogin"
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                >
+                  Giriş Yap
+                </button>
+
+                <div class="mt-4 text-xs text-gray-500 border-t pt-3">
+                  <p class="font-semibold mb-1">Örnek kullanıcılar:</p>
+                  <p>Admin → <code>admin</code> / <code>admin123</code></p>
+                  <p>Personel → <code>personel</code> / <code>personel123</code></p>
+                  <p>Kullanıcı → <code>ayse</code> / <code>ayse123</code></p>
+                  <p>Kullanıcı → <code>fatma</code> / <code>fatma123</code></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        app.innerHTML = loginHtml;
+        attachLoginEvents();
+        return;
+      }
+
+      // Kullanıcı giriş yaptıysa, rolüne göre sekmeleri ayarla
+      if (currentUser.role === 'Resident' && state.activeTab === 'dashboard') {
+        state.activeTab = 'tickets';
+      }
+
+      const analytics = getAnalytics();
+      const filteredTickets = getFilteredTickets();
+
+      // Dashboard
+      const dashboardHtml = `
+        <div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+              <p class="text-sm text-gray-600 mb-1">Toplam Talep</p>
+              <p class="text-3xl font-bold text-gray-900">${analytics.total}</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+              <p class="text-sm text-gray-600 mb-1">Açık</p>
+              <p class="text-3xl font-bold text-blue-600">${analytics.open}</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+              <p class="text-sm text-gray-600 mb-1">İşlemde</p>
+              <p class="text-3xl font-bold text-yellow-600">${analytics.inProgress}</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+              <p class="text-sm text-gray-600 mb-1">Çözüldü</p>
+              <p class="text-3xl font-bold text-green-600">${analytics.resolved}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+              <h3 class="text-lg font-semibold mb-4">Kategori Analizi</h3>
+              <div class="space-y-3">
+                ${analytics.categoryStats
+                  .map(cat => {
+                    const percent = analytics.total ? (cat.count / analytics.total) * 100 : 0;
+                    return `
+                      <div>
+                        <div class="flex justify-between mb-1">
+                          <span class="text-sm text-gray-700">${cat.name}</span>
+                          <span class="text-sm font-medium text-gray-900">${cat.count}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                          <div class="bg-blue-600 h-2 rounded-full" style="width: ${percent}%;"></div>
+                        </div>
+                      </div>
+                    `;
+                  })
+                  .join('')}
+              </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+              <h3 class="text-lg font-semibold mb-4">Performans Metrikleri</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                  <div>
+                    <p class="text-sm text-gray-600">Ortalama Memnuniyet</p>
+                    <p class="text-2xl font-bold text-green-600">${analytics.avgSatisfaction}/5</p>
+                  </div>
+                  <span class="text-4xl">✅</span>
+                </div>
+                <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                  <div>
+                    <p class="text-sm text-gray-600">Aktif Personel</p>
+                    <p class="text-2xl font-bold text-blue-600">
+                      ${state.db.users.filter(u => u.role === 'Staff' && u.is_active).length}
+                    </p>
+                  </div>
+                  <span class="text-4xl">👷</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Talepler
+      const ticketsHtml = `
+        <div>
+          <div class="bg-white rounded-lg shadow-sm mb-6 p-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              ${
+                currentUser.role === 'Admin'
+                  ? `
+                <select
+                  id="filterStatus"
+                  class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all" ${state.filterStatus === 'all' ? 'selected' : ''}>Tüm Durumlar</option>
+                  <option value="Open" ${state.filterStatus === 'Open' ? 'selected' : ''}>Açık</option>
+                  <option value="In_Progress" ${state.filterStatus === 'In_Progress' ? 'selected' : ''}>İşlemde</option>
+                  <option value="Resolved" ${state.filterStatus === 'Resolved' ? 'selected' : ''}>Çözüldü</option>
+                  <option value="Closed" ${state.filterStatus === 'Closed' ? 'selected' : ''}>Kapalı</option>
+                </select>
+              `
+                  : `
+                <span class="text-sm text-gray-600">
+                  Toplam ${filteredTickets.length} talep
+                </span>
+              `
+              }
+            </div>
+            ${
+              currentUser.role === 'Resident'
+                ? `
+              <button
+                id="btnNewTicket"
+                class="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                <span class="text-lg">＋</span>
+                <span>Yeni Şikayet / İstek</span>
+              </button>
+            `
+                : ''
+            }
+          </div>
+
+          <div class="space-y-4">
+            ${
+              filteredTickets.length === 0
+                ? `<p class="text-sm text-gray-500">Gösterilecek talep bulunamadı.</p>`
+                : filteredTickets
+                    .map(ticket => {
+                      const createdAt = new Date(ticket.created_at).toLocaleString('tr-TR');
+                      const statusBadge = getStatusBadgeClass(ticket.status);
+                      const priorityClass = getPriorityClass(ticket.priority);
+
+                      const canTakeOpen =
+                        currentUser.role !== 'Resident' && ticket.status === 'Open';
+                      const canResolve =
+                        currentUser.role !== 'Resident' && ticket.status === 'In_Progress';
+
+                      const staffOptions =
+                        currentUser.role === 'Admin'
+                          ? state.db.users
+                              .filter(u => u.role === 'Staff')
+                              .map(
+                                staff =>
+                                  `<option value="${staff.id}">${staff.full_name}</option>`
+                              )
+                              .join('')
+                          : '';
+
+                      return `
+                        <div class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
+                          <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1">
+                              <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <h3 class="text-lg font-semibold text-gray-900">${ticket.title}</h3>
+                                <span class="px-3 py-1 rounded-full text-xs font-medium ${statusBadge}">
+                                  ${ticket.status}
+                                </span>
+                                <span class="text-sm font-medium ${priorityClass}">
+                                  ${ticket.priority}
+                                </span>
+                              </div>
+                              <p class="text-sm text-gray-600 mb-2">${ticket.description || ''}</p>
+                              <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+                                <span>📍 ${getApartmentInfo(ticket.apartment_id)}</span>
+                                <span>🏷️ ${getCategoryName(ticket.category_id)}</span>
+                                <span>👤 Oluşturan: ${getUserName(ticket.user_id)}</span>
+                                <span>👷 Sorumlu: ${
+                                  ticket.assigned_to ? getUserName(ticket.assigned_to) : 'Atanmadı'
+                                }</span>
+                                <span>🕐 ${createdAt}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          ${
+                            canTakeOpen
+                              ? `
+                            <div class="flex flex-wrap items-center gap-2 mt-4">
+                              <button
+                                class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-sm"
+                                data-action="startTicket"
+                                data-ticket-id="${ticket.id}"
+                              >
+                                İlgileniyorum (İşleme Al)
+                              </button>
+                              ${
+                                currentUser.role === 'Admin'
+                                  ? `
+                                <select
+                                  class="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                                  data-action="assignTicket"
+                                  data-ticket-id="${ticket.id}"
+                                >
+                                  <option value="">Personel Ata</option>
+                                  ${staffOptions}
+                                </select>
+                              `
+                                  : ''
+                              }
+                            </div>
+                          `
+                              : ''
+                          }
+
+                          ${
+                            canResolve
+                              ? `
+                            <button
+                              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm mt-4"
+                              data-action="resolveTicket"
+                              data-ticket-id="${ticket.id}"
+                            >
+                              Çözüldü Olarak Bildir
+                            </button>
+                          `
+                              : ''
+                          }
+                        </div>
+                      `;
+                    })
+                    .join('')
+            }
+          </div>
+        </div>
+      `;
+
+      // Kullanıcılar (sadece Admin)
+      const usersHtml =
+        currentUser.role === 'Admin'
+          ? `
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold mb-4">Kullanıcı Listesi</h3>
+          <div class="space-y-3">
+            ${state.db.users
+              .map(user => {
+                let badgeClass = 'bg-gray-100 text-gray-800';
+                if (user.role === 'Admin') badgeClass = 'bg-purple-100 text-purple-800';
+                else if (user.role === 'Staff') badgeClass = 'bg-blue-100 text-blue-800';
+                else if (user.role === 'Resident') badgeClass = 'bg-green-100 text-green-800';
+
+                return `
+                  <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div>
+                      <p class="font-medium text-gray-900">${user.full_name}</p>
+                      <p class="text-sm text-gray-600">${user.email} • ${user.phone}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium ${badgeClass}">
+                      ${getRoleLabel(user.role)}
+                    </span>
+                  </div>
+                `;
+              })
+              .join('')}
+          </div>
+        </div>
+      `
+          : '';
+
+      // Yeni Talep Modalı (sadece kullanıcı kullanacak)
+      const modalHtml = state.showNewTicketModal
+        ? `
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-xl font-semibold">Yeni Şikayet / İstek</h3>
+              <button id="btnCloseModal" class="text-gray-500 hover:text-gray-700">
+                ✖
+              </button>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kategori *</label>
+                <select
+                  id="ticketCategory"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Seçiniz</option>
+                  ${state.db.categories
+                    .map(
+                      cat => `
+                    <option value="${cat.id}" ${
+                        String(state.newTicket.category_id) === String(cat.id)
+                          ? 'selected'
+                          : ''
+                      }>${cat.name}</option>
+                  `
+                    )
+                    .join('')}
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Başlık *</label>
+                <input
+                  type="text"
+                  id="ticketTitle"
+                  value="${state.newTicket.title.replace(/"/g, '&quot;')}"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Kısa bir başlık yazın"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+                <textarea
+                  id="ticketDescription"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows="3"
+                  placeholder="Detaylı açıklama yazın"
+                >${state.newTicket.description}</textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Öncelik</label>
+                <select
+                  id="ticketPriority"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Low" ${state.newTicket.priority === 'Low' ? 'selected' : ''}>Düşük</option>
+                  <option value="Medium" ${state.newTicket.priority === 'Medium' ? 'selected' : ''}>Orta</option>
+                  <option value="High" ${state.newTicket.priority === 'High' ? 'selected' : ''}>Yüksek</option>
+                  <option value="Critical" ${state.newTicket.priority === 'Critical' ? 'selected' : ''}>Kritik</option>
+                </select>
+              </div>
+
+              <div class="flex space-x-3 pt-4">
+                <button
+                  id="btnCreateTicket"
+                  class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                >
+                  Talep Oluştur
+                </button>
+                <button
+                  id="btnCancelTicket"
+                  class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  İptal
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+        : '';
+
+      // Navigation butonları rol bazlı
+      const navButtons =
+        currentUser.role === 'Resident'
+          ? `
+        <button
+          data-tab="tickets"
+          class="flex items-center space-x-2 px-4 py-2 rounded-md ${
+            state.activeTab === 'tickets'
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-700 hover:bg-gray-100'
+          }"
+        >
+          <span>📄</span>
+          <span>Taleplerim</span>
+        </button>
+      `
+          : `
+        <button
+          data-tab="dashboard"
+          class="flex items-center space-x-2 px-4 py-2 rounded-md ${
+            state.activeTab === 'dashboard'
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-700 hover:bg-gray-100'
+          }"
+        >
+          <span>📊</span>
+          <span>Dashboard</span>
+        </button>
+        <button
+          data-tab="tickets"
+          class="flex items-center space-x-2 px-4 py-2 rounded-md ${
+            state.activeTab === 'tickets'
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-700 hover:bg-gray-100'
+          }"
+        >
+          <span>📄</span>
+          <span>Talepler</span>
+        </button>
+      `;
+
+      const usersTab =
+        currentUser.role === 'Admin'
+          ? `
+        <button
+          data-tab="users"
+          class="flex items-center space-x-2 px-4 py-2 rounded-md ${
+            state.activeTab === 'users'
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-700 hover:bg-gray-100'
+          }"
+        >
+          <span>👥</span>
+          <span>Kullanıcılar</span>
+        </button>
+      `
+          : '';
+
+      const mainHtml = `
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+          <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xl">🏠</div>
+              <div>
+                <h1 class="text-xl font-bold text-gray-900">Site Yönetim Sistemi</h1>
+                <p class="text-sm text-gray-500">İstek & Şikayet Yönetimi</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-4">
+              <span class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 cursor-pointer">🔔</span>
+              <div class="text-right">
+                <p class="text-sm font-medium text-gray-900">${currentUser.full_name}</p>
+                <p class="text-xs text-gray-500">${getRoleLabel(currentUser.role)}</p>
+              </div>
+              <button
+                id="btnLogout"
+                class="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
+              >
+                Çıkış
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-4 py-6">
+          <!-- Navigation -->
+          <div class="bg-white rounded-lg shadow-sm mb-6 p-2 flex space-x-2">
+            ${navButtons}
+            ${usersTab}
+          </div>
+
+          ${
+            state.activeTab === 'dashboard'
+              ? dashboardHtml
+              : state.activeTab === 'tickets'
+              ? ticketsHtml
+              : usersHtml
+          }
+        </div>
+
+        ${modalHtml}
+      `;
+
+      app.innerHTML = mainHtml;
+      attachEvents();
+    }
+
+    // ------------------ Login Event ------------------
+    function attachLoginEvents() {
+      const usernameInput = document.getElementById('loginUsername');
+      const passwordInput = document.getElementById('loginPassword');
+      const btnLogin = document.getElementById('btnLogin');
+
+      if (btnLogin && usernameInput && passwordInput) {
+        btnLogin.addEventListener('click', () => {
+          const username = usernameInput.value.trim();
+          const password = passwordInput.value.trim();
+
+          if (!username || !password) {
+            alert('Lütfen kullanıcı adı ve şifre girin');
+            return;
+          }
+
+          const user = state.db.users.find(
+            u => u.username === username && u.password === password
+          );
+
+          if (!user) {
+            alert('Kullanıcı adı veya şifre hatalı');
+            return;
+          }
+
+          state.currentUserId = user.id;
+          state.activeTab = user.role === 'Resident' ? 'tickets' : 'dashboard';
+          render();
+        });
+
+        // Enter ile login
+        passwordInput.addEventListener('keyup', e => {
+          if (e.key === 'Enter') {
+            btnLogin.click();
+          }
+        });
+      }
+    }
+
+    // ------------------ Uygulama Eventleri ------------------
+    function attachEvents() {
+      const currentUser = getCurrentUser();
+      if (!currentUser) return;
+
+      // Tab değişimi
+      document.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.getAttribute('data-tab');
+          state.activeTab = tab;
+          render();
+        });
+      });
+
+      // Çıkış
+      const btnLogout = document.getElementById('btnLogout');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+          state.currentUserId = null;
+          state.activeTab = 'dashboard';
+          state.showNewTicketModal = false;
+          render();
+        });
+      }
+
+      // Filtre (sadece Admin'de var)
+      const filterStatus = document.getElementById('filterStatus');
+      if (filterStatus) {
+        filterStatus.addEventListener('change', e => {
+          state.filterStatus = e.target.value;
+          render();
+        });
+      }
+
+      // Yeni talep modal aç (sadece Resident)
+      const btnNewTicket = document.getElementById('btnNewTicket');
+      if (btnNewTicket) {
+        btnNewTicket.addEventListener('click', () => {
+          state.showNewTicketModal = true;
+          render();
+        });
+      }
+
+      // Modal içi
+      const btnCloseModal = document.getElementById('btnCloseModal');
+      if (btnCloseModal) {
+        btnCloseModal.addEventListener('click', () => {
+          state.showNewTicketModal = false;
+          render();
+        });
+      }
+
+      const btnCancelTicket = document.getElementById('btnCancelTicket');
+      if (btnCancelTicket) {
+        btnCancelTicket.addEventListener('click', () => {
+          state.showNewTicketModal = false;
+          render();
+        });
+      }
+
+      const btnCreateTicket = document.getElementById('btnCreateTicket');
+      if (btnCreateTicket) {
+        btnCreateTicket.addEventListener('click', () => {
+          createTicket();
+        });
+      }
+
+      const ticketCategory = document.getElementById('ticketCategory');
+      if (ticketCategory) {
+        ticketCategory.addEventListener('change', e => {
+          state.newTicket.category_id = e.target.value;
+        });
+      }
+
+      const ticketTitle = document.getElementById('ticketTitle');
+      if (ticketTitle) {
+        ticketTitle.addEventListener('input', e => {
+          state.newTicket.title = e.target.value;
+        });
+      }
+
+      const ticketDescription = document.getElementById('ticketDescription');
+      if (ticketDescription) {
+        ticketDescription.addEventListener('input', e => {
+          state.newTicket.description = e.target.value;
+        });
+      }
+
+      const ticketPriority = document.getElementById('ticketPriority');
+      if (ticketPriority) {
+        ticketPriority.addEventListener('change', e => {
+          state.newTicket.priority = e.target.value;
+        });
+      }
+
+      // Ticket aksiyonları (Personel + Admin)
+      document.querySelectorAll('[data-action="startTicket"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.getAttribute('data-ticket-id'), 10);
+          const user = getCurrentUser();
+          if (!user) return;
+          updateTicketStatus(id, 'In_Progress', user.id);
+        });
+      });
+
+      document.querySelectorAll('[data-action="resolveTicket"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.getAttribute('data-ticket-id'), 10);
+          updateTicketStatus(id, 'Resolved');
+        });
+      });
+
+      document.querySelectorAll('[data-action="assignTicket"]').forEach(sel => {
+        sel.addEventListener('change', e => {
+          const val = e.target.value;
+          if (!val) return;
+          const staffId = parseInt(val, 10);
+          const ticketId = parseInt(sel.getAttribute('data-ticket-id'), 10);
+          const ticket = state.db.tickets.find(t => t.id === ticketId);
+          if (!ticket) return;
+          updateTicketStatus(ticketId, ticket.status, staffId);
+        });
+      });
+    }
+
+    // İlk açılışta daha önce kayıt varsa yükle
+loadStateFromStorage();
+
+// İlk render
+render();
+
+  </script>
+</body>
+</html>
